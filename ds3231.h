@@ -138,24 +138,54 @@ esp_err_t ds3231_set_time(i2c_dev_t *dev, struct tm *time);
 esp_err_t ds3231_get_time(i2c_dev_t *dev, struct tm *time);
 
 /**
- * @brief Set alarms
+ * @brief Set alarm1
  *
- * `alarm1` works with seconds, minutes, hours and day of week/month, or fires every second.
- * `alarm2` works with minutes, hours and day of week/month, or fires every minute.
+ * Works with seconds, minutes, hours and day of week/month, or fires every second.
  *
- * Not all combinations are supported, see `DS3231_ALARM1_*` and `DS3231_ALARM2_*` defines
- * for valid options you only need to populate the fields you are using in the `tm` struct,
- * and you can set both alarms at the same time (pass `DS3231_ALARM_1`/`DS3231_ALARM_2`/`DS3231_ALARM_BOTH`).
- *
- * If only setting one alarm just pass 0 for `tm` struct and `option` field for the other alarm.
  * If using ::DS3231_ALARM1_EVERY_SECOND/::DS3231_ALARM2_EVERY_MIN you can pass 0 for `tm` struct.
  *
  * If you want to enable interrupts for the alarms you need to do that separately.
  *
+ * @param dev Device descriptor
+ * @param time RTC time
+ * @param option Alarm1 rate option
  * @return ESP_OK to indicate success
  */
-esp_err_t ds3231_set_alarm(i2c_dev_t *dev, ds3231_alarm_t alarms, struct tm *time1,
-                           ds3231_alarm1_rate_t option1, struct tm *time2, ds3231_alarm2_rate_t option2);
+esp_err_t ds3231_set_alarm1(i2c_dev_t *dev, struct tm *time, ds3231_alarm1_rate_t option);
+
+/**
+ * @brief Set alarm2
+ *
+ * Works with minutes, hours and day of week/month, or fires every minute.
+ *
+ * If using ::DS3231_ALARM1_EVERY_SECOND/::DS3231_ALARM2_EVERY_MIN you can pass 0 for `tm` struct.
+ *
+ * If you want to enable interrupts for the alarms you need to do that separately.
+ *
+ * @param dev Device descriptor
+ * @param time RTC time
+ * @param option Alarm2 rate option
+ * @return ESP_OK to indicate success
+ */
+esp_err_t ds3231_set_alarm2(i2c_dev_t *dev, struct tm *time, ds3231_alarm2_rate_t option);
+
+/**
+ * @brief Get alarm1
+ * 
+ * @param dev Device descriptor
+ * @param[out] time RTC time
+ * @return ESP_OK to indicate success
+ */
+esp_err_t ds3231_get_alarm1(i2c_dev_t *dev, struct tm *time);
+
+/**
+ * @brief Get alarm2
+ * 
+ * @param dev Device descriptor
+ * @param[out] time RTC time
+ * @return ESP_OK to indicate success
+ */
+esp_err_t ds3231_get_alarm2(i2c_dev_t *dev, struct tm *time);
 
 /**
  * @brief Check if oscillator has previously stopped
@@ -186,7 +216,7 @@ esp_err_t ds3231_clear_oscillator_stop_flag(i2c_dev_t *dev);
  * @param[out] alarms Alarms
  * @return ESP_OK to indicate success
  */
-esp_err_t ds3231_get_alarm_flags(i2c_dev_t *dev, ds3231_alarm_t *alarms);
+esp_err_t ds3231_get_alarms_fired(i2c_dev_t *dev, ds3231_alarm_t *alarms);
 
 /**
  * @brief Clear alarm past flag(s)
@@ -197,7 +227,7 @@ esp_err_t ds3231_get_alarm_flags(i2c_dev_t *dev, ds3231_alarm_t *alarms);
  * @param alarms Alarms
  * @return ESP_OK to indicate success
  */
-esp_err_t ds3231_clear_alarm_flags(i2c_dev_t *dev, ds3231_alarm_t alarms);
+esp_err_t ds3231_clear_alarms_fired(i2c_dev_t *dev, ds3231_alarm_t alarms);
 
 /**
  * @brief enable alarm interrupts (and disables squarewave)
@@ -224,6 +254,17 @@ esp_err_t ds3231_enable_alarm_ints(i2c_dev_t *dev, ds3231_alarm_t alarms);
  * @return ESP_OK to indicate success
  */
 esp_err_t ds3231_disable_alarm_ints(i2c_dev_t *dev, ds3231_alarm_t alarms);
+
+/**
+ * @brief Check which alarm interrupts are enabled
+ * 
+ * Sets alarms to `DS3231_ALARM_NONE`/`DS3231_ALARM_1`/`DS3231_ALARM_2`/`DS3231_ALARM_BOTH` 
+ *
+ * @param dev Device descriptor
+ * @param[out] alarms Alarms
+ * @return ESP_OK to indicate success
+ */
+esp_err_t ds3231_get_alarm_ints(i2c_dev_t *dev, ds3231_alarm_t *alarms);
 
 /**
  * @brief Enable the output of 32khz signal
