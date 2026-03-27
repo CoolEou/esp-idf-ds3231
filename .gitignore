@@ -10,3 +10,4 @@ docs/**/*.log
 *.orig
 build/
 .vscode/
+/components/ds3231/dist/
