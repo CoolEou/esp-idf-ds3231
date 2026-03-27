@@ -4,6 +4,7 @@
  * Copyright (c) 2015 Richard A Burton <richardaburton@gmail.com>
  * Copyright (c) 2016 Bhuvanchandra DV <bhuvanchandra.dv@gmail.com>
  * Copyright (c) 2018 Ruslan V. Uss <unclerus@gmail.com>
+ * Copyright (c) 2026 CoolEou
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +36,7 @@
  * Copyright (c) 2015 Richard A Burton <richardaburton@gmail.com>\n
  * Copyright (c) 2016 Bhuvanchandra DV <bhuvanchandra.dv@gmail.com>\n
  * Copyright (c) 2018 Ruslan V. Uss <unclerus@gmail.com>
+ * Copyright (c) 2026 CoolEou
  *
  * MIT Licensed as described in the file LICENSE
  */

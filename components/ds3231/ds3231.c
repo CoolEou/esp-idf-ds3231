@@ -4,6 +4,7 @@
  * Copyright (c) 2015 Richard A Burton <richardaburton@gmail.com>
  * Copyright (c) 2016 Bhuvanchandra DV <bhuvanchandra.dv@gmail.com>
  * Copyright (c) 2018 Ruslan V. Uss <unclerus@gmail.com>
+ * Copyright (c) 2026 CoolEou
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +34,7 @@
  * Copyright (c) 2015 Richard A Burton <richardaburton@gmail.com>\n
  * Copyright (c) 2016 Bhuvanchandra DV <bhuvanchandra.dv@gmail.com>\n
  * Copyright (c) 2018 Ruslan V. Uss <unclerus@gmail.com>
+ * Copyright (c) 2026 CoolEou
  *
  * MIT Licensed as described in the file LICENSE
  */
@@ -118,11 +120,18 @@ esp_err_t ds3231_init_desc(i2c_dev_t *dev, i2c_port_t port, gpio_num_t sda_gpio,
 
     dev->port = port;
     dev->addr = DS3231_ADDR;
+
     dev->cfg.sda_io_num = sda_gpio;
     dev->cfg.scl_io_num = scl_gpio;
+
+    // Enable internal pull-ups
+    dev->cfg.sda_pullup_en = GPIO_PULLUP_ENABLE;
+    dev->cfg.scl_pullup_en = GPIO_PULLUP_ENABLE;
+
 #if HELPER_TARGET_IS_ESP32
     dev->cfg.master.clk_speed = I2C_FREQ_HZ;
 #endif
+
     return i2c_dev_create_mutex(dev);
 }
 
@@ -165,12 +174,12 @@ esp_err_t ds3231_set_alarm1(i2c_dev_t *dev, struct tm *time, ds3231_alarm1_rate_
     uint8_t data[7];
 
     /* alarm 1 data */
-    CHECK_ARG(time1);
-    data[i++] = (option1 >= DS3231_ALARM1_MATCH_SEC ? dec2bcd(time1->tm_sec) : DS3231_ALARM_NOTSET);
-    data[i++] = (option1 >= DS3231_ALARM1_MATCH_SECMIN ? dec2bcd(time1->tm_min) : DS3231_ALARM_NOTSET);
-    data[i++] = (option1 >= DS3231_ALARM1_MATCH_SECMINHOUR ? dec2bcd(time1->tm_hour) : DS3231_ALARM_NOTSET);
-    data[i++] = (option1 == DS3231_ALARM1_MATCH_SECMINHOURDAY ? (dec2bcd(time1->tm_wday + 1) & DS3231_ALARM_WDAY) :
-                 (option1 == DS3231_ALARM1_MATCH_SECMINHOURDATE ? dec2bcd(time1->tm_mday) : DS3231_ALARM_NOTSET));
+    CHECK_ARG(time);
+    data[i++] = (option >= DS3231_ALARM1_MATCH_SEC ? dec2bcd(time->tm_sec) : DS3231_ALARM_NOTSET);
+    data[i++] = (option >= DS3231_ALARM1_MATCH_SECMIN ? dec2bcd(time->tm_min) : DS3231_ALARM_NOTSET);
+    data[i++] = (option >= DS3231_ALARM1_MATCH_SECMINHOUR ? dec2bcd(time->tm_hour) : DS3231_ALARM_NOTSET);
+    data[i++] = (option == DS3231_ALARM1_MATCH_SECMINHOURDAY ? (dec2bcd(time->tm_wday + 1) & DS3231_ALARM_WDAY) :
+                 (option == DS3231_ALARM1_MATCH_SECMINHOURDATE ? dec2bcd(time->tm_mday) : DS3231_ALARM_NOTSET));
 
     I2C_DEV_TAKE_MUTEX(dev);
     I2C_DEV_CHECK(dev, i2c_dev_write_reg(dev, DS3231_ADDR_ALARM1, data, i));
@@ -188,11 +197,11 @@ esp_err_t ds3231_set_alarm2(i2c_dev_t *dev, struct tm *time, ds3231_alarm2_rate_
 
     /* alarm 2 data */
 
-    CHECK_ARG(time2);
-    data[i++] = (option2 >= DS3231_ALARM2_MATCH_MIN ? dec2bcd(time2->tm_min) : DS3231_ALARM_NOTSET);
-    data[i++] = (option2 >= DS3231_ALARM2_MATCH_MINHOUR ? dec2bcd(time2->tm_hour) : DS3231_ALARM_NOTSET);
-    data[i++] = (option2 == DS3231_ALARM2_MATCH_MINHOURDAY ? (dec2bcd(time2->tm_wday + 1) & DS3231_ALARM_WDAY) :
-                 (option2 == DS3231_ALARM2_MATCH_MINHOURDATE ? dec2bcd(time2->tm_mday) : DS3231_ALARM_NOTSET));
+    CHECK_ARG(time);
+    data[i++] = (option >= DS3231_ALARM2_MATCH_MIN ? dec2bcd(time->tm_min) : DS3231_ALARM_NOTSET);
+    data[i++] = (option >= DS3231_ALARM2_MATCH_MINHOUR ? dec2bcd(time->tm_hour) : DS3231_ALARM_NOTSET);
+    data[i++] = (option == DS3231_ALARM2_MATCH_MINHOURDAY ? (dec2bcd(time->tm_wday + 1) & DS3231_ALARM_WDAY) :
+                 (option == DS3231_ALARM2_MATCH_MINHOURDATE ? dec2bcd(time->tm_mday) : DS3231_ALARM_NOTSET));
 
     I2C_DEV_TAKE_MUTEX(dev);
     I2C_DEV_CHECK(dev, i2c_dev_write_reg(dev, DS3231_ADDR_ALARM2, data, i));
@@ -386,7 +395,7 @@ esp_err_t ds3231_get_alarm_ints(i2c_dev_t *dev, ds3231_alarm_t *alarms)
     CHECK_ARG(dev);
 
     I2C_DEV_TAKE_MUTEX(dev);
-    I2C_DEV_CHECK(dev, ds3231_get_flag(dev, DS3231_ADDR_STATUS, DS3231_ALARM_BOTH, (uint8_t *)alarms));
+    I2C_DEV_CHECK(dev, ds3231_get_flag(dev, DS3231_ADDR_CONTROL, DS3231_ALARM_BOTH, (uint8_t *)alarms));
     I2C_DEV_GIVE_MUTEX(dev);
 
     return ESP_OK;

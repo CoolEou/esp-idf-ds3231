@@ -8,8 +8,12 @@ void ds3231_test(void *pvParameters)
 {
     i2c_dev_t dev;
     memset(&dev, 0, sizeof(i2c_dev_t));
+    
+    ESP_ERROR_CHECK(ds3231_init_desc(&dev, 0, 8, 10));  // Switch out 8(SDA) and 10(SCL) here with the correct SDA and SCL pins for your MCU
 
-    ESP_ERROR_CHECK(ds3231_init_desc(&dev, 0, CONFIG_EXAMPLE_I2C_MASTER_SDA, CONFIG_EXAMPLE_I2C_MASTER_SCL));
+    // Reset the alarms
+    ESP_ERROR_CHECK(ds3231_clear_alarms_fired(&dev, DS3231_ALARM_BOTH));
+    ESP_ERROR_CHECK(ds3231_disable_alarm_ints(&dev, DS3231_ALARM_BOTH));
 
     // setup datetime: 2016-10-09 13:50:10
     struct tm time =
@@ -23,47 +27,51 @@ void ds3231_test(void *pvParameters)
     };
     ESP_ERROR_CHECK(ds3231_set_time(&dev, &time));
 
-    // setup alarmtime: friday at 17:25
+    // setup alarmtime: 13:51
     struct tm alarm =
     {
-        .tm_wday = 4,
-        .tm_hour = 17,
-        .tm_min  = 25,
-    };
-    ESP_ERROR_CHECK(ds3231_set_alarm2(&dev, &alarm, DS3231_ALARM2_MATCH_SECMINHOURDAY));
-
-    // setup alarmtime: 9th day of month at 13:51:10
-    alarm =
-    {
-        .tm_mday = 9,
         .tm_hour = 13,
         .tm_min  = 51,
-        .tm_sec  = 10
     };
+    ESP_ERROR_CHECK(ds3231_set_alarm2(&dev, &alarm, DS3231_ALARM2_MATCH_MINHOUR));
+
+    // setup alarmtime: 9th day of the month at 13:50:20
+    alarm.tm_mday = 9;
+    alarm.tm_hour = 13;
+    alarm.tm_min  = 50;
+    alarm.tm_sec  = 20;
+
     ESP_ERROR_CHECK(ds3231_set_alarm1(&dev, &alarm, DS3231_ALARM1_MATCH_SECMINHOURDATE));
 
     if (ds3231_get_alarm2(&dev, &alarm) != ESP_OK)
     {
         printf("Could not get alarm2\n");
-        continue;
     }
-    printf("Alarm 2 is set to: %02d day of week %02d:%02d", alarm.tm_wday, alarm.tm_hour, alarm.tm_min)
+    printf("Alarm 2 is set to: %02d day of week %02d:%02d\n", alarm.tm_wday, alarm.tm_hour, alarm.tm_min);
 
     if (ds3231_get_alarm1(&dev, &alarm) != ESP_OK)
     {
         printf("Could not get alarm1\n");
-        continue;
     }
-    printf("Alarm 1 is set to: %02d day of month %02d:%02d:%02d", time.tm_mon + 1, alarm.tm_mday, alarm.tm_hour, alarm.tm_min, time.tm_sec)
+    printf("Alarm 1 is set to: %02d day of month %02d:%02d:%02d\n", alarm.tm_mday, alarm.tm_hour, alarm.tm_min, time.tm_sec);
 
     // Set alarm int
-    ds3231_enable_alarm_ints(&dev, DS3231_ALARM_1);
+    ESP_ERROR_CHECK(ds3231_enable_alarm_ints(&dev, DS3231_ALARM_1));
 
     // Check alarm int
     ds3231_alarm_t alarms = DS3231_ALARM_NONE;
-    ds3231_get_alarm_ints(&dev, &alarms);
+    if (ds3231_get_alarm_ints(&dev, &alarms) != ESP_OK)
+    {
+        printf("Could not get alarm ints\n");
+    }
+    printf("Alarms active: %02d\n", alarms);
 
-    printf("alarms active: %02d", alarms)
+    bool flag = 0;
+    if (ds3231_get_oscillator_stop_flag(&dev, &flag) != ESP_OK)
+    {
+        printf("Could not get oscillator stop flag\n");
+    }
+    printf("Oscillator stop flag: %d\n", flag);
 
     while (1)
     {

@@ -1,0 +1,23 @@
+---
+version: 0.1.0
+description: Driver for and DS3231 high precision RTC module
+license: MIT
+targets:
+  - esp32
+  - esp32c2
+  - esp32c3
+  - esp32c5
+  - esp32c6
+  - esp32c61
+  - esp32h2
+  - esp32p4
+  - esp32s2
+  - esp32s3
+dependencies:
+  esp-idf-lib/i2cdev:
+    version: "*"
+  esp-idf-lib/esp_idf_lib_helpers:
+    version: "*"
+maintainers:
+  - Ruslan V. Uss (@UncleRus) <unclerus@gmail.com>
+repository: https://github.com/CoolEou/esp-idf-ds3231

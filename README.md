@@ -1,30 +1,32 @@
-# esp-idf-lib/ds3231
+# esp-idf-ds3231
 
-[![Build examples](https://github.com/esp-idf-lib/ds3231/actions/workflows//build.yml/badge.svg)](https://github.com/esp-idf-lib/ds3231/actions/workflows//build.yml)
-[![Build docs](https://github.com/esp-idf-lib/ds3231/actions/workflows//build-docs.yml/badge.svg)](https://github.com/esp-idf-lib/ds3231/actions/workflows//build-docs.yml)
-[![Validation](https://github.com/esp-idf-lib/ds3231/actions/workflows//validate-component.yml/badge.svg)](https://github.com/esp-idf-lib/ds3231/actions/workflows//validate-component.yml)
+Driver for DS3231 high precision RTC module.
 
-Driver for DS1337 RTC and DS3231 high precision RTC module.
+## Credits
 
-* [Documentation](https://esp-idf-lib.github.io/ds3231/)
-* [Repository](https://github.com/esp-idf-lib/ds3231)
-* [Issues](https://github.com/esp-idf-lib/ds3231/issues)
-* [Discussions and questions](https://github.com/esp-idf-lib/core/discussions)
-* [Component page at the ESP Component Registry](https://components.espressif.com/components/esp-idf-lib/ds3231)
+This project is based on the DS3231 driver from esp-idf-lib:
+https://github.com/esp-idf-lib/ds3231
+
+Original authors:
+- Richard A Burton
+- Bhuvanchandra DV
+- Ruslan V. Uss
+
+## Modifications
+
+This version includes the following changes:
+
+- Split set alarm function into alarm1 and alarm2 to make the functions slightly simpler to use
+- Added get alarm functions for both alarm1 and alarm2 to check what time the alarm is set to
+- Added get alarm ints function to check which alarms are active/will trigger the interrupt when time matches the alarm
+- Enabled internal pullups when initializing the i2c device (done in the ds3231_init_desc function)
 
 ## Installation
 
 ```sh
-idf.py add-dependency esp-idf-lib/ds3231
+idf.py add-dependency "CoolEou/ds3231"
 ```
 
-## Support
+## Note about the DS3132 interrupts
 
-For questions and discussions about the component, please use
-[Discussions](https://github.com/esp-idf-lib/core/discussions)
-at [esp-idf-lib/core](https://github.com/esp-idf-lib/core).
-
-## Contributing
-
-Please read [CONTRIBUTING.md](https://github.com/esp-idf-lib/core/blob/main/CONTRIBUTING.md)
-at [esp-idf-lib/core](https://github.com/esp-idf-lib/core).
+Something that tripped me up when playing with the DS3231, is the fact that despite the interrupt for a given alarm being disabled, the alarm fired flag will still go high once the time matches the alarm time. So if you try to deactivate the alarm by disabling the interrupt, but you use the alarm fired flag to trigger your alarm, the alarm will still be active.
