@@ -24,7 +24,7 @@ This version includes the following changes:
 ## Installation
 
 ```sh
-idf.py add-dependency "CoolEou/ds3231"
+idf.py add-dependency "cooleou/ds3231"
 ```
 
 ## Note about the DS3132 interrupts
