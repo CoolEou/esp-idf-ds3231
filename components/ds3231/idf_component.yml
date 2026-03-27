@@ -19,5 +19,5 @@ dependencies:
   esp-idf-lib/esp_idf_lib_helpers:
     version: "*"
 maintainers:
-  - Ruslan V. Uss (@UncleRus) <unclerus@gmail.com>
+  - CoolEou
 repository: https://github.com/CoolEou/esp-idf-ds3231
